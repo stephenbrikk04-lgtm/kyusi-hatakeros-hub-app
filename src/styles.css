@@ -12,7 +12,7 @@
   --text: #f3f4f8; --text-2: #a4a6b6; --text-3: #6c6e80;
   --accent: #8b7bff; --accent-hover: #9d8fff; --accent-soft: #211f3d; --accent-text: #fff;
   --accent-grad: linear-gradient(135deg, #7b6bff, #b06bff);
-  --win: #36d399; --win-soft: #0f2f24; --live: #f5c518; --live-soft: #2c2606;
+  --win: #36d399; --win-soft: #0f2f24; --live: #f5c518; --live-soft: #2c2606; --on-live: #3a2c00;
   --danger: #f56565; --danger-soft: #2e1517;
   --shadow: 0 1px 2px rgba(0,0,0,.5); --shadow-md: 0 6px 22px rgba(0,0,0,.42); --shadow-lg: 0 20px 56px rgba(0,0,0,.6);
   --ring: 0 0 0 3px rgba(139,123,255,.32);
@@ -23,7 +23,7 @@
   --text: #181d2b; --text-2: #596175; --text-3: #99a0b4;
   --accent: #6257e8; --accent-hover: #5046d6; --accent-soft: #ecebfc; --accent-text: #fff;
   --accent-grad: linear-gradient(135deg, #6257e8, #9b5cf0);
-  --win: #11a06a; --win-soft: #e2f5ec; --live: #a87a00; --live-soft: #f8f0d8;
+  --win: #11a06a; --win-soft: #e2f5ec; --live: #a87a00; --live-soft: #f8f0d8; --on-live: #ffffff;
   --danger: #dc4a44; --danger-soft: #fbe9e8;
   --shadow: 0 1px 3px rgba(30,40,70,.06); --shadow-md: 0 6px 22px rgba(30,40,70,.08); --shadow-lg: 0 20px 48px rgba(30,40,70,.14);
   --ring: 0 0 0 3px rgba(98,87,232,.2);
@@ -205,29 +205,32 @@ h3 { font-size: 14px; font-weight: 700; }
 
 /* ---------- bracket ---------- */
 .bracket-wrap { overflow-x: auto; padding: 6px 2px 14px; }
-.bracket { display: flex; gap: 52px; padding: 8px 4px; min-width: min-content; position: relative; }
+.bracket { display: flex; gap: 44px; padding: 8px 4px; min-width: min-content; position: relative; }
 .bracket-connectors { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 0; overflow: visible; }
 .bracket-connectors path { fill: none; stroke: var(--border-strong); stroke-width: 2; }
 .round-col { position: relative; z-index: 1; }
-.round-col { display: flex; flex-direction: column; justify-content: space-around; gap: 16px; min-width: 210px; }
+.round-col { display: flex; flex-direction: column; justify-content: space-around; gap: 14px; min-width: 224px; }
 .round-title { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase;
   letter-spacing: .08em; text-align: center; margin-bottom: 4px; }
 .match { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
   overflow: hidden; transition: all var(--speed); box-shadow: var(--shadow); }
 .match:hover { border-color: var(--accent); }
 .match.clickable { cursor: pointer; }
-.match.done { border-left: 3px solid var(--win); }
 .match.live { border-left: 3px solid var(--live); }
 .match.bye { opacity: .7; }
-.slot { display: flex; align-items: center; gap: 9px; padding: 9px 11px; position: relative; }
+.slot { display: flex; align-items: center; gap: 8px; padding: 6px 10px; position: relative; }
 .slot + .slot { border-top: 1px solid var(--border); }
-.seed { font-size: 10px; color: var(--text-3); width: 16px; font-weight: 700; text-align: center; flex: none; }
-.pname { font-weight: 600; font-size: 13px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seed { font-size: 9px; color: var(--text-3); width: 13px; font-weight: 700; text-align: center; flex: none; }
+.pname { font-weight: 600; font-size: 12.5px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pname.tbd { color: var(--text-3); font-weight: 500; font-style: italic; }
-.score { font-weight: 800; font-size: 14px; min-width: 22px; text-align: center; color: var(--text-2); }
-.slot.win .pname { color: var(--text); }
-.slot.win .score { color: var(--win); }
-.slot.lose .pname, .slot.lose .score { color: var(--text-3); }
+.score { margin-left: auto; min-width: 24px; height: 22px; display: grid; place-items: center; border-radius: 6px;
+  font-weight: 800; font-size: 13px; background: var(--surface-2); color: var(--text-3); flex: none; }
+/* gold winner highlight: row wash + bold name + solid gold score chip */
+.slot.win { background: color-mix(in srgb, var(--live) 14%, transparent); }
+.slot.win .pname { color: var(--text); font-weight: 700; }
+.slot.win .score { background: var(--live); color: var(--on-live); }
+.slot.lose .pname { color: var(--text-3); }
+.slot.lose .score { background: var(--surface-2); color: var(--text-3); }
 .p-badge { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
   padding: 1px 5px; border-radius: 4px; flex: none; }
 .p-badge.judge { background: var(--live-soft); color: var(--live); }
