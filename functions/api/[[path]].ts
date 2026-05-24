@@ -59,9 +59,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     } })
   }
 
-  await ensureSchema(env)
+  // these don't need the database
+  if (parts[0] === 'health') return json({ ok: true, store: 'd1', dbBound: !!env.DB })
 
-  // POST /api/login
   if (parts[0] === 'login' && method === 'POST') {
     const { user, pass } = await request.json().catch(() => ({}))
     const okUser = (env.ORG_USER || 'Kyusihatakeros2026')
@@ -70,9 +70,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return json({ error: 'invalid credentials' }, 401)
   }
 
-  if (parts[0] === 'health') return json({ ok: true, store: 'd1' })
-
   if (parts[0] === 'tournaments') {
+    if (!env.DB) return json({ error: 'Database not connected. Add a D1 binding named "DB" → khth-db in the Pages project settings, then redeploy.' }, 503)
+    await ensureSchema(env)
     const id = parts[1]
     // list
     if (!id && method === 'GET') {
