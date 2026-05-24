@@ -1,6 +1,10 @@
 # Cloudflare Pages config. The app builds to dist/ and Pages Functions live in functions/.
-# The D1 database binding ("DB" → khth-db) is configured in the Pages dashboard
-# (Settings → Bindings), so it is NOT declared here (a database_id would be required if it were).
 name = "kyusi-hatakeros-hub-app"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "dist"
+
+# D1 (SQLite) binding — connects the database to the API functions as `env.DB`.
+[[d1_databases]]
+binding = "DB"
+database_name = "khth-db"
+database_id = "4065d7dd-f8c4-4eda-bea7-045dbc8b5b7e"
