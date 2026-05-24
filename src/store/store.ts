@@ -17,6 +17,7 @@ interface State {
   mode: 'dark' | 'light'
   role: Role
   authed: boolean // organizer is logged in
+  token: string | null // server write token (persisted so saves survive a page reload)
 }
 
 const ORG_USER = 'Kyusihatakeros2026'
@@ -38,15 +39,18 @@ function load(): State {
         if (!t.log) t.log = []
       }
       if (state.authed === undefined) state.authed = false
+      if (state.token === undefined) state.token = null
       // role follows auth: a saved organizer stays logged in across reloads
       state.role = state.authed ? 'organizer' : 'viewer'
       return state
     }
   } catch {}
-  return { tournaments: [], mode: 'dark', role: 'viewer', authed: false }
+  return { tournaments: [], mode: 'dark', role: 'viewer', authed: false, token: null }
 }
 
 let state: State = load()
+// restore the write token so the organizer's saves keep reaching the server after a reload
+let syncToken: string | null = state.token
 const listeners = new Set<() => void>()
 
 function persist() {
@@ -92,8 +96,6 @@ export function applyMode() {
 
 // ---- role / auth ----
 // Organizer access is gated by login. Viewer is always allowed.
-let syncToken: string | null = null
-
 export function setRole(role: Role) {
   set((s) => ({ ...s, role: role === 'organizer' && !s.authed ? s.role : role }))
 }
@@ -105,7 +107,7 @@ export async function login(user: string, pass: string): Promise<boolean> {
     const token = await apiLogin(user, pass)
     if (!token) return false
     syncToken = token
-    set((s) => ({ ...s, authed: true, role: 'organizer' }))
+    set((s) => ({ ...s, authed: true, role: 'organizer', token })) // persist the token
     // publish any tournaments created offline so viewers can see them
     state.tournaments.forEach((t) => apiPut(t.id, t, token).catch(() => {}))
     return true
@@ -119,7 +121,7 @@ export async function login(user: string, pass: string): Promise<boolean> {
 
 export function logout() {
   syncToken = null
-  set((s) => ({ ...s, authed: false, role: 'viewer' }))
+  set((s) => ({ ...s, authed: false, role: 'viewer', token: null }))
 }
 
 // Push a tournament to the backend (organizer only). Fire-and-forget.
