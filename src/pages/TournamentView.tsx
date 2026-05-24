@@ -287,7 +287,7 @@ function byeCandidatesFor(t: Tournament, m: Match) {
 function SetupView({ t }: { t: Tournament }) {
   const canStart = t.participants.filter((p) => p.active).length >= 2
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 360px', gap: 24, alignItems: 'start' }}>
+    <div className="split">
       <div className="panel">
         <div className="panel-head"><h3>Ready to start</h3></div>
         <div className="panel-body">
@@ -426,7 +426,7 @@ function LogView({ t }: { t: Tournament }) {
 
 function SettingsTab({ t, usesPoints }: { t: Tournament; usesPoints: boolean }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: usesPoints ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr', gap: 22, alignItems: 'start', maxWidth: 820 }}>
+    <div className={usesPoints ? 'split-even' : ''} style={{ maxWidth: 820 }}>
       <div className="panel">
         <div className="panel-head"><h3>Tournament</h3></div>
         <div className="panel-body">

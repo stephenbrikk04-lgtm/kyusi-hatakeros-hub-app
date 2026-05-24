@@ -66,6 +66,7 @@ export default function Standings({
           )}
         </div>
       )}
+      <div className="table-scroll">
       <table className="table">
         <thead>
           <tr>
@@ -130,6 +131,7 @@ export default function Standings({
           })}
         </tbody>
       </table>
+      </div>
       <div className="rank-note">Ranked by: {settings.tiebreakOrder.map((c) => RANK_LABELS[c].short).join(' › ')}</div>
     </div>
   )

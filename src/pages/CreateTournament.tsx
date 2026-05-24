@@ -50,7 +50,7 @@ export default function CreateTournament() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 360px', gap: 26, alignItems: 'start' }}>
+      <div className="split">
         {/* left column */}
         <div>
           <div className="panel">

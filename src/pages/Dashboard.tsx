@@ -91,7 +91,7 @@ export default function Dashboard() {
 
 function ListView({ tournaments, organizer }: { tournaments: Tournament[]; organizer: boolean }) {
   return (
-    <div className="panel">
+    <div className="panel table-scroll">
       <table className="table list-table">
         <thead>
           <tr>

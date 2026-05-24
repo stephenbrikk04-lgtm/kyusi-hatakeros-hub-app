@@ -92,6 +92,13 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .container { max-width: 1200px; margin: 0 auto; }
 .hide-sm { display: inline; }
 
+/* responsive layout helpers */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+.split-even { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: start; max-width: 860px; }
+.table-scroll { overflow-x: auto; }
+.table-scroll .table { width: auto; min-width: 100%; }
+.table-scroll .table th, .table-scroll .table td { white-space: nowrap; }
+
 /* ---------- typography / headers ---------- */
 h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
 h2 { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
@@ -403,4 +410,22 @@ h3 { font-size: 14px; font-weight: 700; }
   .page-head h1 { font-size: 22px; }
   .live-shell { padding: 12px 14px 50px; }
   .live-bar { position: static; }
+
+  /* collapse the two-column layouts so nothing overflows */
+  .split, .split-even { grid-template-columns: 1fr; gap: 18px; }
+  .split-even { max-width: none; }
+
+  /* branded dashboard header stacks */
+  .hub-header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; }
+  .hub-header h1 { font-size: 18px; }
+  .hub-header .head-actions { margin-left: 0 !important; width: 100%; }
+  .hub-header .head-actions .btn { width: 100%; justify-content: center; }
+
+  /* tabs scroll in one row instead of wrapping */
+  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { white-space: nowrap; margin-right: 18px; }
+
+  .page-head { gap: 12px; }
+  .modal { max-width: 100%; }
 }

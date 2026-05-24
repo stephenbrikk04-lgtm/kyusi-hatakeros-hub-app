@@ -57,8 +57,8 @@ export default function Leaderboards() {
           <button className="btn primary" style={{ marginTop: 16 }} onClick={() => navigate('/new')}>New Tournament</button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 24, alignItems: 'start' }}>
-          <div className="panel">
+        <div className="split">
+          <div className="panel table-scroll">
             <div className="panel-head"><h3>All-time player ranking</h3></div>
             <table className="table">
               <thead><tr><th style={{ width: 40 }}>#</th><th>Player</th><th className="num">Titles</th><th className="num">Match wins</th><th className="num">Played</th></tr></thead>
