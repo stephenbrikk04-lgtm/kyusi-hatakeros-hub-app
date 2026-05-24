@@ -17,6 +17,7 @@ import ScoreModal from '../components/ScoreModal'
 import PointsEditor from '../components/PointsEditor'
 import RankOrderEditor from '../components/RankOrderEditor'
 import { fmtDate } from './Dashboard'
+import { backendEnabled } from '../backend'
 import { IconBack, IconShare, IconTrophy, IconClock, IconEye, IconMedal, IconCheck } from '../components/Icons'
 
 export default function TournamentView({ id, viewerOnly = false }: { id: string; viewerOnly?: boolean }) {
@@ -452,8 +453,11 @@ function SettingsTab({ t, usesPoints }: { t: Tournament; usesPoints: boolean }) 
 
 function share(t: Tournament) {
   const url = `${location.origin}${location.pathname}#/live/${t.id}`
+  const note = backendEnabled()
+    ? '\n\nShare with participants — they can watch the live tournament on any device.'
+    : '\n\n⚠️ Local-only mode: this link only works in the same browser. (Backend not enabled in this build.)'
   navigator.clipboard?.writeText(url).then(
-    () => alert('Live spectator link copied:\n\n' + url + '\n\nNote: viewers must open it in this same browser/device (local data) unless the app is hosted with a shared backend.'),
-    () => prompt('Copy the live spectator link:', url),
+    () => alert('Live link copied:\n\n' + url + note),
+    () => prompt('Copy the live link:', url),
   )
 }

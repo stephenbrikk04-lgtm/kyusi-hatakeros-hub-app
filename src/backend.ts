@@ -1,10 +1,10 @@
 import { Tournament } from './types'
 
-// Backend is enabled when VITE_API_URL is set (point at a remote API) OR VITE_SELF_HOSTED=true
-// (the app is served by our own server, so the API lives at the same origin → relative /api).
-// When neither is set the app runs local-only (localStorage) — e.g. the static GitHub Pages build.
+// The app talks to a backend API by default (same-origin /api), since it's served by our own
+// server / Cloudflare Pages. Set VITE_API_URL to point at a remote API instead, or
+// VITE_SELF_HOSTED=false to force pure local-only mode (no backend).
 const RAW = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || ''
-const SELF = (import.meta.env.VITE_SELF_HOSTED as string | undefined) === 'true'
+const SELF = (import.meta.env.VITE_SELF_HOSTED as string | undefined) !== 'false' // default ON
 const API = RAW // '' means same-origin relative requests
 
 export const backendEnabled = () => !!RAW || SELF
