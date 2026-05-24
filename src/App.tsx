@@ -73,6 +73,7 @@ export default function App() {
         <button className="foot-btn" onClick={toggleMode}>
           <ModeIcon /> {mode === 'dark' ? 'Light mode' : 'Dark mode'}
         </button>
+        <div className="credit">Created By: T2. Fugazi</div>
       </div>
     </>
   )

@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react'
 import { Match, Participant, RANK_LABELS, RankCriterion, StandingRow, TournamentSettings } from '../types'
 import { computeStandings, participantHistory, HistoryRow } from '../engine/standings'
 import { setParticipantTB } from '../store/store'
-import { IconCheck, IconCrown, IconMedal } from './Icons'
+import { IconCheck, IconCrown } from './Icons'
 
 // Every criterion that has a column. Order shown = the organizer's ranking order first (enabled),
 // then any disabled criteria. Head-to-head is a comparator, so it has no column.
@@ -87,13 +87,14 @@ export default function Standings({
         <tbody>
           {rows.map((r) => {
             const expanded = open === r.participantId
-            const advanced = stageComplete && r.advancing
+            const advancing = advanceCount > 0 && r.advancing
+            const medalRank = podium && r.rank <= 3
             return (
               <Fragment key={r.participantId}>
                 <tr className={r.advancing ? 'advancing' : ''}
                   style={{ cursor: 'pointer' }} onClick={() => setOpen(expanded ? null : r.participantId)}
                   title="Click for match history">
-                  <td><span className={`rank-badge ${r.rank === 1 ? 'top' : ''}`}>{r.rank}</span></td>
+                  <td><span className={`rank-badge ${medalRank ? `rk-medal ${medalCls(r.rank)}` : r.rank === 1 ? 'top' : ''}`}>{r.rank}</span></td>
                   <td style={{ fontWeight: 600 }}>
                     <span className="expand-caret">{expanded ? '▾' : '▸'}</span> {byId.get(r.participantId)?.name ?? '—'}
                     {byId.get(r.participantId)?.staff && (
@@ -106,15 +107,10 @@ export default function Standings({
                         {claimed?.has(r.participantId) ? 'Bounty Claimed' : 'Bounty'}
                       </span>
                     )}
-                    {podium && r.rank <= 3 && (
-                      <span className={`medal ${medalCls(r.rank)}`} title={r.rank === 1 ? 'Champion' : r.rank === 2 ? '2nd place' : '3rd place'}>
-                        <IconMedal size={13} />
-                      </span>
-                    )}
                     {leaderLabel && r.rank === 1 && (
                       <span className="king-badge"><IconCrown size={12} /> {leaderLabel}</span>
                     )}
-                    {advanced && <span className="adv-badge"><IconCheck size={11} /> Top cut</span>}
+                    {advancing && <span className="adv-badge"><IconCheck size={11} /> Top Cut</span>}
                   </td>
                   <td><FormStrip rows={participantHistory(r.participantId, matches)} matches={matches} onPick={onPickMatch} /></td>
                   {cols.map((c) => <td key={c} className="num">{cell(r, c)}</td>)}

@@ -18,7 +18,7 @@ import PointsEditor from '../components/PointsEditor'
 import RankOrderEditor from '../components/RankOrderEditor'
 import { fmtDate } from './Dashboard'
 import { backendEnabled } from '../backend'
-import { IconBack, IconShare, IconTrophy, IconClock, IconEye, IconMedal, IconCheck, IconExpand } from '../components/Icons'
+import { IconBack, IconShare, IconTrophy, IconClock, IconEye, IconCheck, IconExpand } from '../components/Icons'
 
 // Fullscreen toggle — only used here, in tournament mode (per design).
 function useFullscreen(): [boolean, () => void] {
@@ -40,6 +40,7 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
   const organizer = !viewerOnly && useRole() === 'organizer'
   const [picked, setPicked] = useState<Match | null>(null)
   const [tab, setTab] = useState('')
+  const [sub, setSub] = useState('')
 
   if (!t) {
     return (
@@ -58,19 +59,23 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
   const playoffDouble = t.settings.playoffFormat === 'double'
   const stage1 = t.matches.filter((m) => m.stage !== 'playoff')
 
-  // tabs by format + role (viewers don't get Participants / Settings)
-  let tabs: string[]
+  // top-level tabs: Group Stage / Final Stage for ranking formats; single Bracket for pure elim
+  let topTabs: string[]
   if (isElim) {
-    tabs = ['Bracket']
+    topTabs = ['Bracket']
   } else {
-    tabs = [multiGroup ? 'Brackets' : 'Standings']
-    if (!multiGroup) tabs.push('Rounds') // single-pool round-by-round schedule
-    if (t.settings.groupStage) tabs.push('Top Cut')
+    topTabs = ['Group Stage']
+    if (t.settings.groupStage) topTabs.push('Final Stage')
   }
-  tabs.push('Log')
-  if (organizer) tabs.push('Participants', 'Settings')
+  topTabs.push('Log')
+  if (organizer) topTabs.push('Participants', 'Settings')
+  const activeTop = topTabs.includes(tab) ? tab : topTabs[0]
 
-  const active = tabs.includes(tab) ? tab : tabs[0]
+  // sub-tabs within a stage
+  const groupSub = multiGroup ? ['Brackets'] : ['Standings', 'Matches']
+  const finalSub = ['Standings', 'Top Cut']
+  const subTabs = activeTop === 'Group Stage' ? groupSub : activeTop === 'Final Stage' ? finalSub : []
+  const activeSub = subTabs.includes(sub) ? sub : subTabs[0]
 
   const isRanking = t.settings.format === 'round_robin' || t.settings.format === 'swiss'
   const s1done = isRanking ? stage1Complete(t) : false
@@ -161,10 +166,23 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
       </div>
 
       {podium && podium.gold && (
-        <div className="podium-banner">
-          <div className="podium-place gold"><IconTrophy size={16} /><span className="pl-rank">Champion</span><b>{podium.gold}</b></div>
-          {podium.silver && <div className="podium-place silver"><IconMedal size={16} /><span className="pl-rank">2nd</span><b>{podium.silver}</b></div>}
-          {podium.bronze && <div className="podium-place bronze"><IconMedal size={16} /><span className="pl-rank">3rd</span><b>{podium.bronze}</b></div>}
+        <div className="podium">
+          <div className="pod gold">
+            <span className="ptrophy"><IconTrophy size={30} /></span>
+            <div className="pod-info"><span className="pl-rank">Champion</span><b>{podium.gold}</b></div>
+          </div>
+          {podium.silver && (
+            <div className="pod silver">
+              <span className="ptrophy"><IconTrophy size={30} /></span>
+              <div className="pod-info"><span className="pl-rank">Finalist</span><b>{podium.silver}</b></div>
+            </div>
+          )}
+          {podium.bronze && (
+            <div className="pod bronze">
+              <span className="ptrophy"><IconTrophy size={30} /></span>
+              <div className="pod-info"><span className="pl-rank">3rd Place</span><b>{podium.bronze}</b></div>
+            </div>
+          )}
         </div>
       )}
 
@@ -185,10 +203,10 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
             : <span style={{ marginLeft: 'auto' }} className="dim">Waiting for the organizer to start the top cut.</span>}
         </div>
       )}
-      {t.status === 'complete' && podium?.gold && !t.tournamentEnded && (
+      {t.status === 'complete' && podium?.gold && !t.tournamentEnded && organizer && (
         <div className="banner win">
-          <span>{podium.gold} is the champion! 🏆</span>
-          {organizer && <button className="btn primary sm" style={{ marginLeft: 'auto' }} onClick={() => endTournament(t.id)}>End of Tournament</button>}
+          <span>All matches complete — review the final results below.</span>
+          <button className="btn primary sm" style={{ marginLeft: 'auto' }} onClick={() => endTournament(t.id)}>End of Tournament</button>
         </div>
       )}
       {t.tournamentEnded && (
@@ -210,20 +228,33 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
           </div>
 
           <div className="tabs">
-            {tabs.map((tb) => (
-              <button key={tb} className={`tab ${active === tb ? 'on' : ''}`} onClick={() => setTab(tb)}>{tb}</button>
+            {topTabs.map((tb) => (
+              <button key={tb} className={`tab ${activeTop === tb ? 'on' : ''}`} onClick={() => setTab(tb)}>{tb}</button>
             ))}
           </div>
 
-          {active === 'Bracket' && (
+          {subTabs.length > 1 && (
+            <div className="subseg">
+              {subTabs.map((s) => (
+                <button key={s} className={`subtab ${activeSub === s ? 'on' : ''}`} onClick={() => setSub(s)}>{s}</button>
+              ))}
+            </div>
+          )}
+
+          {/* pure elimination */}
+          {activeTop === 'Bracket' && (
             <Bracket matches={t.matches.filter((m) => m.bracket !== 'playoff')} participants={t.participants}
               onPick={setPicked} editable={editable} isDouble={isDouble} claimed={claimed} onPlay={onPlay} />
           )}
 
-          {active === 'Standings' && (
+          {/* GROUP STAGE */}
+          {activeTop === 'Group Stage' && multiGroup && (
+            <GroupsView t={t} onPick={setPicked} editable={editable} claimed={claimed} onPlay={onPlay} />
+          )}
+          {activeTop === 'Group Stage' && !multiGroup && activeSub === 'Standings' && (
             <>
               <Standings participants={t.participants.filter((p) => p.active)} matches={stage1}
-                settings={t.settings} title="Standings" tournamentId={organizer ? t.id : undefined}
+                settings={t.settings} title="Group Stage Standings" tournamentId={organizer ? t.id : undefined}
                 advanceCount={advanceCount} stageComplete={stageDone}
                 leaderLabel={leaderLabel} podium={standingsPodium} claimed={claimed}
                 onPickMatch={editable ? setPicked : undefined} />
@@ -231,28 +262,28 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
                 <AddToBracket tid={t.id} groupId={null} label="the round robin" />}
             </>
           )}
-
-          {active === 'Rounds' && (
+          {activeTop === 'Group Stage' && !multiGroup && activeSub === 'Matches' && (
             <Bracket matches={stage1} participants={t.participants} onPick={setPicked} editable={editable}
               isDouble={false} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} />
           )}
 
-          {active === 'Brackets' && <GroupsView t={t} onPick={setPicked} editable={editable} claimed={claimed} onPlay={onPlay} />}
-
-          {active === 'Top Cut' && (
-            t.playoffStarted ? (
-              <Bracket matches={t.matches.filter((m) => m.stage === 'playoff')} participants={t.participants}
-                onPick={setPicked} editable={editable} isDouble={playoffDouble} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} />
-            ) : (
-              <div className="empty"><div className="ico"><IconTrophy size={38} /></div>
-                <h2>Top Cut not started</h2>
-                <p>End the {stageName.toLowerCase()}, then start the top cut — the top {t.settings.advancePerGroup}{multiGroup ? ' per bracket' : ''} advance.</p></div>
-            )
+          {/* FINAL STAGE */}
+          {activeTop === 'Final Stage' && !t.playoffStarted && (
+            <div className="empty"><div className="ico"><IconTrophy size={38} /></div>
+              <h2>Final Stage not started</h2>
+              <p>End the {stageName.toLowerCase()}, then start the top cut — the top {t.settings.advancePerGroup}{multiGroup ? ' per bracket' : ''} advance.</p></div>
+          )}
+          {activeTop === 'Final Stage' && t.playoffStarted && activeSub === 'Standings' && (
+            <TopCutStandings t={t} />
+          )}
+          {activeTop === 'Final Stage' && t.playoffStarted && activeSub === 'Top Cut' && (
+            <Bracket matches={t.matches.filter((m) => m.stage === 'playoff')} participants={t.participants}
+              onPick={setPicked} editable={editable} isDouble={playoffDouble} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} />
           )}
 
-          {active === 'Participants' && <SeedList t={t} />}
-          {active === 'Log' && <LogView t={t} />}
-          {active === 'Settings' && <SettingsTab t={t} usesPoints={usesPoints} />}
+          {activeTop === 'Participants' && <SeedList t={t} />}
+          {activeTop === 'Log' && <LogView t={t} />}
+          {activeTop === 'Settings' && <SettingsTab t={t} usesPoints={usesPoints} />}
         </>
       )}
 
@@ -466,6 +497,67 @@ function SettingsTab({ t, usesPoints }: { t: Tournament; usesPoints: boolean }) 
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// Final-stage placement of the top-cut participants, derived from the playoff bracket.
+function topCutPlacement(t: Tournament): { id: string; rank: number; label: string }[] {
+  const set = t.matches.filter((m) => m.stage === 'playoff')
+  if (set.length === 0) return []
+  const players = new Set<string>()
+  for (const m of set) {
+    if (m.a.participantId) players.add(m.a.participantId)
+    if (m.b.participantId) players.add(m.b.participantId)
+  }
+  const maxRound = Math.max(...set.map((m) => m.round))
+  // the round at which each player lost (champion never loses); 3rd-place winner ranks just above other semi losers
+  const lostAt = new Map<string, number>()
+  for (const m of set) {
+    if (m.state !== 'done' || !m.winnerId || m.isBye) continue
+    const loser = m.winnerId === m.a.participantId ? m.b.participantId : m.a.participantId
+    if (loser) lostAt.set(loser, Math.max(lostAt.get(loser) ?? 0, m.consolation ? maxRound + 0.1 : m.round))
+  }
+  const pod = elimPodium(t)
+  const weight = (id: string) =>
+    id === pod.gold ? 1e9 : id === pod.silver ? 1e8 : id === pod.bronze ? 1e7 : (lostAt.get(id) ?? 0)
+  const ordered = [...players].sort((a, b) => weight(b) - weight(a))
+  return ordered.map((id, i) => {
+    let label: string
+    if (id === pod.gold) label = 'Champion'
+    else if (id === pod.silver) label = 'Finalist'
+    else if (id === pod.bronze) label = '3rd Place'
+    else {
+      const fromEnd = maxRound - Math.floor(lostAt.get(id) ?? 0)
+      label = fromEnd <= 0 ? 'Finalist' : fromEnd === 1 ? 'Semifinal' : fromEnd === 2 ? 'Quarterfinal' : `Top ${Math.pow(2, fromEnd + 1)}`
+    }
+    return { id, rank: i + 1, label }
+  })
+}
+
+function TopCutStandings({ t }: { t: Tournament }) {
+  const nameOf = (id: string) => t.participants.find((p) => p.id === id)?.name ?? '—'
+  const rows = topCutPlacement(t)
+  const medalCls = (rank: number) => (rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze')
+  const finishCls = (label: string) =>
+    label === 'Champion' ? 'champ' : label === 'Finalist' ? 'f2' : label === '3rd Place' ? 'f3' : 'out'
+  return (
+    <div className="panel">
+      <div className="panel-head"><h3>Final Stage Standings</h3><span className="dim" style={{ fontSize: 12 }}>Top cut placement</span></div>
+      <div className="table-scroll">
+        <table className="table">
+          <thead><tr><th style={{ width: 40 }}>#</th><th>Participant</th><th className="num">Finish</th></tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id}>
+                <td><span className={`rank-badge ${r.rank <= 3 ? `rk-medal ${medalCls(r.rank)}` : ''}`}>{r.rank}</span></td>
+                <td style={{ fontWeight: 600 }}>{nameOf(r.id)}</td>
+                <td className="num"><span className={`finish ${finishCls(r.label)}`}>{r.label}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

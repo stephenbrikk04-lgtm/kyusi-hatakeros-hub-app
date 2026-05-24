@@ -384,6 +384,56 @@ h3 { font-size: 14px; font-weight: 700; }
 .podium-place.silver > svg { color: #9aa0b4; }
 .podium-place.bronze > svg { color: #c97a3a; }
 
+/* ===== revamp: stage sub-tabs, trophy podium, medallion ranks, match numbers, finish pills ===== */
+.subseg { display: inline-flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px; margin: 2px 0 16px; }
+.subtab { padding: 7px 16px; border-radius: 999px; font-weight: 700; font-size: 13px; color: var(--text-2); transition: all var(--speed); }
+.subtab:hover { color: var(--text); }
+.subtab.on { background: var(--accent); color: var(--accent-text); }
+
+.podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.pod { display: flex; align-items: center; gap: 16px; border-radius: var(--r-lg); border: 1px solid var(--border);
+  background: var(--surface); padding: 16px 18px; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+.pod .ptrophy { position: relative; z-index: 2; display: grid; place-items: center; }
+.pod-info { position: relative; z-index: 2; min-width: 0; }
+.pod .pl-rank { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.pod b { display: block; font-size: 18px; font-weight: 800; letter-spacing: -.01em; margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pod.gold { border-color: color-mix(in srgb, #f5b301 50%, var(--border)); }
+.pod.gold::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, #f5b301 16%, transparent), transparent 60%); }
+.pod.gold .ptrophy, .pod.gold .pl-rank { color: #f5b301; }
+.pod.silver { border-color: color-mix(in srgb, #aab1bf 50%, var(--border)); }
+.pod.silver::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, #aab1bf 20%, transparent), transparent 60%); }
+.pod.silver .ptrophy, .pod.silver .pl-rank { color: #9aa0b4; }
+.pod.bronze { border-color: color-mix(in srgb, #cd8a4e 48%, var(--border)); }
+.pod.bronze::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, #cd8a4e 20%, transparent), transparent 60%); }
+.pod.bronze .ptrophy, .pod.bronze .pl-rank { color: #cd8a4e; }
+@media (max-width: 720px) { .podium { grid-template-columns: 1fr; } }
+
+/* numbered medallion rank badge — final-stage standings, top 3 */
+.rank-badge.rk-medal { border-radius: 50%; color: #5c4400;
+  box-shadow: inset 0 1px 1.5px rgba(255,255,255,.5), inset 0 -1px 2px rgba(0,0,0,.2), 0 1px 3px rgba(0,0,0,.28); }
+.rank-badge.rk-medal.gold { background: linear-gradient(155deg, #ffe89a, #f5c518 58%, #c69e08); color: #5c4400; }
+.rank-badge.rk-medal.silver { background: linear-gradient(155deg, #ffffff, #cdd3dd 58%, #969eae); color: #414a59; }
+.rank-badge.rk-medal.bronze { background: linear-gradient(155deg, #f1c79b, #cd8a4e 58%, #8a5526); color: #48280c; }
+
+/* match index number beside each bracket match (Challonge-style) */
+.match-wrap { display: flex; align-items: center; gap: 9px; }
+.match-wrap .match { flex: 1; min-width: 0; }
+.match-no { font-size: 11px; font-weight: 700; color: var(--text-3); min-width: 14px; text-align: right; flex: none; }
+
+/* finish pill — final-stage standings */
+.finish { display: inline-block; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.finish.champ { background: var(--live-soft); color: var(--live); }
+.finish.f2 { background: var(--accent-soft); color: var(--accent); }
+.finish.f3 { background: color-mix(in srgb, #cd8a4e 22%, transparent); color: #c47a36; }
+.finish.out { background: var(--surface-2); color: var(--text-3); }
+
+/* sidebar credit */
+.credit { margin-top: 10px; padding: 4px 12px 0; font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: .02em; }
+
 .icon-btn.lg svg { width: 22px; height: 22px; }
 
 @media (max-width: 1080px) { .stats { grid-template-columns: repeat(2, 1fr); } .fmt-grid { grid-template-columns: 1fr; } }

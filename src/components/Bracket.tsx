@@ -125,6 +125,12 @@ function Columns({
     if (m.loserToMatchId && m.loserToSlot) fed.add(m.loserToMatchId + ':' + m.loserToSlot)
   }
   const rounds = [...new Set(matches.map((m) => m.round))].sort((a, b) => a - b)
+  // sequential match index shown beside each match (Challonge-style)
+  let n = 0
+  const matchNo = new Map<string, number>()
+  for (const r of rounds) {
+    for (const m of matches.filter((x) => x.round === r).sort((a, b) => a.order - b.order)) matchNo.set(m.id, ++n)
+  }
   return (
     <div className="bracket-wrap">
       <div className="bracket" ref={bracketRef}>
@@ -139,9 +145,12 @@ function Columns({
             <div className="round-col" key={r}>
               <div className="round-title">{col[0]?.label ?? `Round ${r}`}</div>
               {col.map((m) => (
-                <MatchCard key={m.id} m={m} names={names}
-                  fedA={fed.has(m.id + ':a')} fedB={fed.has(m.id + ':b')}
-                  onPick={onPick} editable={editable} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} />
+                <div className="match-wrap" key={m.id}>
+                  <span className="match-no">{matchNo.get(m.id)}</span>
+                  <MatchCard m={m} names={names}
+                    fedA={fed.has(m.id + ':a')} fedB={fed.has(m.id + ':b')}
+                    onPick={onPick} editable={editable} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} />
+                </div>
               ))}
             </div>
           )
