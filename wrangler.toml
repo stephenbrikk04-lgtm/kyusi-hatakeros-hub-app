@@ -1,0 +1,11 @@
+# Cloudflare Pages config. The app is built to dist/ and Pages Functions live in functions/.
+name = "kyusi-hatakeros-hub"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+# D1 (SQLite) binding. For a GitHub/dashboard deploy you create the D1 database in the
+# Cloudflare dashboard and bind it as "DB" there; for wrangler deploys, set database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "khth-db"
+# database_id = "<paste after: npx wrangler d1 create khth-db>"
