@@ -114,6 +114,10 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
   // stage-1 finished → show "Advanced" badges in the standings
   const advanceCount = t.settings.groupStage ? t.settings.advancePerGroup : 0
   const stageDone = t.settings.groupStage && stage1Complete(t)
+  // winner decided by standings (Swiss King / King of the Hill) rather than a top-cut champion
+  const rankingWin = !isElim && !t.playoffStarted && ended
+  const goldLabel = rankingWin ? (leaderLabel ?? 'Champion') : 'Champion'
+  const silverLabel = rankingWin ? 'Runner-up' : 'Finalist'
 
   const submit = (a: number, b: number) => {
     if (!picked) return
@@ -169,12 +173,12 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
         <div className="podium">
           <div className="pod gold">
             <span className="ptrophy"><IconTrophy size={30} /></span>
-            <div className="pod-info"><span className="pl-rank">Champion</span><b>{podium.gold}</b></div>
+            <div className="pod-info"><span className="pl-rank">{goldLabel}</span><b>{podium.gold}</b></div>
           </div>
           {podium.silver && (
             <div className="pod silver">
               <span className="ptrophy"><IconTrophy size={30} /></span>
-              <div className="pod-info"><span className="pl-rank">Finalist</span><b>{podium.silver}</b></div>
+              <div className="pod-info"><span className="pl-rank">{silverLabel}</span><b>{podium.silver}</b></div>
             </div>
           )}
           {podium.bronze && (
@@ -255,7 +259,7 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
             <>
               <Standings participants={t.participants.filter((p) => p.active)} matches={stage1}
                 settings={t.settings} title="Group Stage Standings" tournamentId={organizer ? t.id : undefined}
-                advanceCount={advanceCount} stageComplete={stageDone}
+                advanceCount={advanceCount} stageComplete={reveal}
                 leaderLabel={leaderLabel} podium={standingsPodium} claimed={claimed}
                 onPickMatch={editable ? setPicked : undefined} />
               {editable && t.settings.format === 'round_robin' && !t.playoffStarted &&
@@ -278,7 +282,7 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
           )}
           {activeTop === 'Final Stage' && t.playoffStarted && activeSub === 'Top Cut' && (
             <Bracket matches={t.matches.filter((m) => m.stage === 'playoff')} participants={t.participants}
-              onPick={setPicked} editable={editable} isDouble={playoffDouble} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} />
+              onPick={setPicked} editable={editable} isDouble={playoffDouble} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} hideBounty />
           )}
 
           {activeTop === 'Participants' && <SeedList t={t} />}

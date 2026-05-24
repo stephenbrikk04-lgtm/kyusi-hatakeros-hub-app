@@ -9,11 +9,11 @@ function slotName(id: string | null, names: NameMap, fed: boolean): { text: stri
 }
 
 function MatchCard({
-  m, names, fedA, fedB, onPick, editable, byeEditable, claimed, onPlay,
+  m, names, fedA, fedB, onPick, editable, byeEditable, claimed, onPlay, hideBounty,
 }: {
   m: Match; names: NameMap; fedA: boolean; fedB: boolean
   onPick: (m: Match) => void; editable: boolean; byeEditable: boolean
-  claimed: Set<string>; onPlay?: (m: Match) => void
+  claimed: Set<string>; onPlay?: (m: Match) => void; hideBounty?: boolean
 }) {
   const a = slotName(m.a.participantId, names, fedA)
   const b = slotName(m.b.participantId, names, fedB)
@@ -38,13 +38,13 @@ function MatchCard({
       <div className={`slot ${aWin ? 'win' : ''} ${aLose ? 'lose' : ''}`}>
         <span className="seed">{m.a.participantId ? seedOf(m.a.participantId, names) : ''}</span>
         <span className={`pname ${a.tbd ? 'tbd' : ''}`}>{a.text}</span>
-        {!a.tbd && <PartTag id={m.a.participantId} names={names} claimed={claimed} />}
+        {!a.tbd && <PartTag id={m.a.participantId} names={names} claimed={claimed} hideBounty={hideBounty} />}
         <span className="score">{m.state === 'done' || m.reported ? m.a.score : '–'}</span>
       </div>
       <div className={`slot ${bWin ? 'win' : ''} ${bLose ? 'lose' : ''}`}>
         <span className="seed">{m.b.participantId ? seedOf(m.b.participantId, names) : ''}</span>
         <span className={`pname ${b.tbd ? 'tbd' : ''}`}>{b.text}</span>
-        {!b.tbd && <PartTag id={m.b.participantId} names={names} claimed={claimed} />}
+        {!b.tbd && <PartTag id={m.b.participantId} names={names} claimed={claimed} hideBounty={hideBounty} />}
         <span className="score">{m.state === 'done' || m.reported ? m.b.score : '–'}</span>
       </div>
       {canPlay && (
@@ -64,7 +64,7 @@ function seedOf(id: string, names: NameMap): number | string {
 }
 
 // staff label (judge/organizer) or a paid/unpaid dot, plus a bounty badge, beside the name
-function PartTag({ id, names, claimed }: { id: string | null; names: NameMap; claimed: Set<string> }) {
+function PartTag({ id, names, claimed, hideBounty }: { id: string | null; names: NameMap; claimed: Set<string>; hideBounty?: boolean }) {
   if (!id) return null
   const p = names.get(id)
   if (!p) return null
@@ -73,7 +73,8 @@ function PartTag({ id, names, claimed }: { id: string | null; names: NameMap; cl
       {p.staff
         ? <span className={`p-badge ${p.staff}`}>{p.staff === 'judge' ? 'Judge' : 'Org'}</span>
         : <span className={`p-dot ${p.paid ? 'paid' : 'unpaid'}`} title={p.paid ? 'Paid' : 'Unpaid'} />}
-      {p.bounty && (
+      {/* bounty only applies during the group stage (Swiss / round robin) — dropped in the top cut */}
+      {p.bounty && !hideBounty && (
         <span className={`p-badge ${claimed.has(id) ? 'bounty-claimed' : 'bounty'}`}>
           {claimed.has(id) ? 'Bounty Claimed' : 'Bounty'}
         </span>
@@ -83,10 +84,10 @@ function PartTag({ id, names, claimed }: { id: string | null; names: NameMap; cl
 }
 
 function Columns({
-  matches, names, onPick, editable, byeEditable, claimed, onPlay,
+  matches, names, onPick, editable, byeEditable, claimed, onPlay, hideBounty,
 }: {
   matches: Match[]; names: NameMap; onPick: (m: Match) => void; editable: boolean; byeEditable: boolean
-  claimed: Set<string>; onPlay?: (m: Match) => void
+  claimed: Set<string>; onPlay?: (m: Match) => void; hideBounty?: boolean
 }) {
   const bracketRef = useRef<HTMLDivElement>(null)
   const [conn, setConn] = useState<{ w: number; h: number; paths: string[] }>({ w: 0, h: 0, paths: [] })
@@ -149,7 +150,7 @@ function Columns({
                   <span className="match-no">{matchNo.get(m.id)}</span>
                   <MatchCard m={m} names={names}
                     fedA={fed.has(m.id + ':a')} fedB={fed.has(m.id + ':b')}
-                    onPick={onPick} editable={editable} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} />
+                    onPick={onPick} editable={editable} byeEditable={byeEditable} claimed={claimed} onPlay={onPlay} hideBounty={hideBounty} />
                 </div>
               ))}
             </div>
@@ -161,14 +162,14 @@ function Columns({
 }
 
 export default function Bracket({
-  matches, participants, onPick, editable, isDouble, byeEditable = false, claimed = EMPTY, onPlay,
+  matches, participants, onPick, editable, isDouble, byeEditable = false, claimed = EMPTY, onPlay, hideBounty = false,
 }: {
   matches: Match[]; participants: Participant[]
   onPick: (m: Match) => void; editable: boolean; isDouble: boolean; byeEditable?: boolean
-  claimed?: Set<string>; onPlay?: (m: Match) => void
+  claimed?: Set<string>; onPlay?: (m: Match) => void; hideBounty?: boolean
 }) {
   const names: NameMap = new Map(participants.map((p) => [p.id, p]))
-  const cp = { claimed, onPlay }
+  const cp = { claimed, onPlay, hideBounty }
 
   if (isDouble) {
     const wb = matches.filter((m) => m.bracket === 'winners')

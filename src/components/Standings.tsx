@@ -87,7 +87,7 @@ export default function Standings({
         <tbody>
           {rows.map((r) => {
             const expanded = open === r.participantId
-            const advancing = advanceCount > 0 && r.advancing
+            const advancing = stageComplete && advanceCount > 0 && r.advancing
             const medalRank = podium && r.rank <= 3
             return (
               <Fragment key={r.participantId}>
