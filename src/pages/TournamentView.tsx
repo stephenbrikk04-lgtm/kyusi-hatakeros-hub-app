@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { navigate } from '../router'
 import {
   useTournament, startTournament, reportScore, clearScore, resetToSetup,
@@ -18,7 +18,22 @@ import PointsEditor from '../components/PointsEditor'
 import RankOrderEditor from '../components/RankOrderEditor'
 import { fmtDate } from './Dashboard'
 import { backendEnabled } from '../backend'
-import { IconBack, IconShare, IconTrophy, IconClock, IconEye, IconMedal, IconCheck } from '../components/Icons'
+import { IconBack, IconShare, IconTrophy, IconClock, IconEye, IconMedal, IconCheck, IconExpand } from '../components/Icons'
+
+// Fullscreen toggle — only used here, in tournament mode (per design).
+function useFullscreen(): [boolean, () => void] {
+  const [fs, setFs] = useState(!!document.fullscreenElement)
+  useEffect(() => {
+    const on = () => setFs(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', on)
+    return () => document.removeEventListener('fullscreenchange', on)
+  }, [])
+  const toggle = () => {
+    if (document.fullscreenElement) document.exitFullscreen?.()
+    else document.documentElement.requestFullscreen?.()
+  }
+  return [fs, toggle]
+}
 
 export default function TournamentView({ id, viewerOnly = false }: { id: string; viewerOnly?: boolean }) {
   const t = useTournament(id)
@@ -109,6 +124,7 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
   }
   const onPlay = (m: Match) => setMatchLive(t.id, m.id, !m.live)
   const claimed = claimedBounties(t.participants, t.matches)
+  const [fs, toggleFs] = useFullscreen()
 
   return (
     <>
@@ -132,11 +148,14 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
           </div>
         </div>
         <div className="head-actions">
+          <button className="btn sm ghost" onClick={toggleFs} title={fs ? 'Exit full screen' : 'Full screen'}>
+            <IconExpand size={15} /> <span className="hide-sm">{fs ? 'Exit' : 'Full screen'}</span>
+          </button>
           {organizer && t.status === 'setup' ? (
             <button className="btn primary" disabled={t.participants.filter((p) => p.active).length < 2}
               onClick={() => startTournament(t.id)}>Start tournament</button>
           ) : (
-            <button className="btn sm" onClick={() => share(t)}><IconShare size={14} /> Share live link</button>
+            <button className="btn sm" onClick={() => share(t)}><IconShare size={14} /> <span className="hide-sm">Share live link</span></button>
           )}
         </div>
       </div>

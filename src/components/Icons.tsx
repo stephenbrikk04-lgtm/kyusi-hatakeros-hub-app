@@ -58,6 +58,12 @@ export const IconClock = ({ size }: P) => (
 export const IconCheck = ({ size }: P) => (
   <svg {...base(size)}><path d="M20 6L9 17l-5-5" /></svg>
 )
+export const IconMenu = ({ size }: P) => (
+  <svg {...base(size)}><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+)
+export const IconClose = ({ size }: P) => (
+  <svg {...base(size)}><path d="M18 6L6 18M6 6l12 12" /></svg>
+)
 export const IconCrown = ({ size }: P) => (
   <svg {...base(size)}><path d="M3 6l4 5 5-7 5 7 4-5-1.5 13H4.5L3 6z" /></svg>
 )
