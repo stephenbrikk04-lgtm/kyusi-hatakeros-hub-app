@@ -40,10 +40,7 @@ export default function App() {
       </button>
 
       <nav className="nav-list">
-        <button className={`nav ${active === 'dashboard' ? 'on' : ''}`} onClick={() => go('/')}>
-          <IconGrid /> <span>Dashboard</span>
-        </button>
-        <button className={`nav ${active === 'tournament' ? 'on' : ''}`} onClick={() => go('/')}>
+        <button className={`nav ${active === 'dashboard' || active === 'tournament' ? 'on' : ''}`} onClick={() => go('/')}>
           <IconTrophy /> <span>Tournaments</span> <span className="count">{tournaments.length}</span>
         </button>
         {hasRanking && (
