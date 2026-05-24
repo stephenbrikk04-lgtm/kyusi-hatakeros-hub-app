@@ -1,0 +1,18 @@
+# Render Blueprint — deploys the Kyusi Hatakeros Tournament Hub (app + API on one free web service).
+# In Render: New + → Blueprint → connect this repo. It reads this file; you fill the secret values.
+services:
+  - type: web
+    name: kyusi-hatakeros-hub
+    runtime: node
+    plan: free
+    buildCommand: npm install && VITE_SELF_HOSTED=true npm run build && rm -rf server/public && cp -r dist server/public && npm install --prefix server
+    startCommand: node server/index.mjs
+    envVars:
+      - key: ORG_USER
+        sync: false   # set your organizer username
+      - key: ORG_PASS
+        sync: false   # set your organizer password
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false   # from Upstash (free Redis) — persistent storage
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false   # from Upstash
