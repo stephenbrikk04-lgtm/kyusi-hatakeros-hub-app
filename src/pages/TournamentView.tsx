@@ -80,8 +80,9 @@ export default function TournamentView({ id, viewerOnly = false }: { id: string;
   const isRanking = t.settings.format === 'round_robin' || t.settings.format === 'swiss'
   const s1done = isRanking ? stage1Complete(t) : false
   const ended = !!t.stage1Ended
-  // reveal the final ranking (Swiss King / King of the Hill + medals) once the stage is ended
-  const reveal = !isRanking || ended || t.playoffStarted
+  // reveal the ranking result (Swiss King / King of the Hill + Top Cut badges) once every group
+  // match is played — no need to wait for the organizer to formally end the stage
+  const reveal = !isRanking || s1done || ended || t.playoffStarted
 
   const nameOf = (pid: string | null) => (pid ? t.participants.find((p) => p.id === pid)?.name ?? null : null)
   const podium = (() => {
