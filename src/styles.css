@@ -344,7 +344,8 @@ h3 { font-size: 14px; font-weight: 700; }
 .seed-item .s-actions { display: flex; gap: 4px; }
 .p-item { flex-direction: column; align-items: stretch; gap: 8px; }
 .p-top { display: flex; align-items: center; gap: 10px; }
-.p-meta { display: flex; align-items: center; gap: 10px; padding-left: 36px; }
+.p-meta { display: flex; align-items: center; gap: 10px 14px; padding-left: 36px; flex-wrap: wrap; }
+.p-meta .check { white-space: nowrap; }
 .p-role { padding: 5px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border);
   color: var(--text); font-size: 12px; font-weight: 600; }
 .p-role:focus { outline: none; border-color: var(--accent); }

@@ -70,7 +70,7 @@ export default function Dashboard() {
       ) : (
         <>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-            <h2>Your tournaments</h2>
+            <h2>Your Tournaments</h2>
             <div className="seg" style={{ marginLeft: 'auto' }}>
               <button className={view === 'list' ? 'on' : ''} onClick={() => setViewP('list')}>List</button>
               <button className={view === 'grid' ? 'on' : ''} onClick={() => setViewP('grid')}>Grid</button>
@@ -96,6 +96,7 @@ function ListView({ tournaments, organizer }: { tournaments: Tournament[]; organ
         <thead>
           <tr>
             <th>Tournament</th>
+            <th>Status</th>
             <th>Game</th>
             <th>Organizer</th>
             <th>Type</th>
@@ -114,10 +115,8 @@ function ListView({ tournaments, organizer }: { tournaments: Tournament[]; organ
             }
             return (
               <tr key={t.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/t/${t.id}`)}>
-                <td style={{ fontWeight: 600 }}>
-                  {t.name}
-                  <div><span className={statusTag[t.status].cls} style={{ marginTop: 4 }}>{statusTag[t.status].label}</span></div>
-                </td>
+                <td style={{ fontWeight: 600 }}>{t.name}</td>
+                <td><span className={statusTag[t.status].cls}>{statusTag[t.status].label}</span></td>
                 <td className="muted">{t.game || '—'}</td>
                 <td className="muted">{t.organizer || '—'}</td>
                 <td className="muted">{FORMAT_LABELS[t.settings.format]}{t.settings.format === 'round_robin' && t.settings.groupCount > 1 ? ` · ${t.settings.groupCount} brackets` : ''}{t.settings.groupStage ? ' → playoff' : ''}</td>

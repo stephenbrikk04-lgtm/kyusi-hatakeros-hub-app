@@ -91,7 +91,7 @@ export default function Standings({
             const medalRank = podium && r.rank <= 3
             return (
               <Fragment key={r.participantId}>
-                <tr className={r.advancing ? 'advancing' : ''}
+                <tr className={advancing ? 'advancing' : ''}
                   style={{ cursor: 'pointer' }} onClick={() => setOpen(expanded ? null : r.participantId)}
                   title="Click for match history">
                   <td><span className={`rank-badge ${medalRank ? `rk-medal ${medalCls(r.rank)}` : r.rank === 1 ? 'top' : ''}`}>{r.rank}</span></td>
