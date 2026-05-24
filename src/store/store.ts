@@ -51,6 +51,12 @@ function load(): State {
 let state: State = load()
 // restore the write token so the organizer's saves keep reaching the server after a reload
 let syncToken: string | null = state.token
+// stuck session from an older build (marked logged-in but with no server token) → force a real
+// re-login so the organizer gets a token and their saves actually sync.
+if (backendEnabled() && state.authed && !state.token) {
+  state.authed = false
+  state.role = 'viewer'
+}
 const listeners = new Set<() => void>()
 
 function persist() {
