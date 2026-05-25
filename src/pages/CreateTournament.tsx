@@ -229,7 +229,6 @@ export default function CreateTournament() {
           <div className="panel-body">
             <label className="label">One name per line</label>
             <textarea className="textarea" style={{ minHeight: 230 }} value={namesText}
-              placeholder={'Nova Esports\nShadow Unit\nApex Squad\nTitan Core'}
               onChange={(e) => setNamesText(e.target.value)} />
             <div className="hint">Seeding follows this order (top = seed 1). You can re-seed and shuffle later.</div>
 

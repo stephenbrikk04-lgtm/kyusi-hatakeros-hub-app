@@ -21,18 +21,25 @@ import { backendEnabled } from '../backend'
 import { IconBack, IconShare, IconTrophy, IconClock, IconEye, IconCheck, IconExpand } from '../components/Icons'
 
 // Fullscreen toggle — only used here, in tournament mode (per design).
+// Driven by a CSS "focus mode" class so it works everywhere (iPhone Safari has no
+// Fullscreen API); the native API is attempted as a bonus where it's supported (desktop).
 function useFullscreen(): [boolean, () => void] {
-  const [fs, setFs] = useState(!!document.fullscreenElement)
+  const [fs, setFs] = useState(false)
   useEffect(() => {
-    const on = () => setFs(!!document.fullscreenElement)
+    document.body.classList.toggle('fs-mode', fs)
+    if (fs) document.documentElement.requestFullscreen?.().catch(() => {})
+    else if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {})
+  }, [fs])
+  useEffect(() => {
+    // if the user leaves native fullscreen (e.g. Esc), drop our CSS focus mode too
+    const on = () => { if (!document.fullscreenElement) setFs(false) }
     document.addEventListener('fullscreenchange', on)
-    return () => document.removeEventListener('fullscreenchange', on)
+    return () => {
+      document.removeEventListener('fullscreenchange', on)
+      document.body.classList.remove('fs-mode')
+    }
   }, [])
-  const toggle = () => {
-    if (document.fullscreenElement) document.exitFullscreen?.()
-    else document.documentElement.requestFullscreen?.()
-  }
-  return [fs, toggle]
+  return [fs, () => setFs((v) => !v)]
 }
 
 export default function TournamentView({ id, viewerOnly = false }: { id: string; viewerOnly?: boolean }) {

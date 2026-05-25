@@ -178,10 +178,12 @@ h3 { font-size: 14px; font-weight: 700; }
 /* Native date/time inputs don't size like text inputs (esp. iOS Safari): strip the
    native control styling so they fill the column and line up with sibling fields. */
 .input[type="date"], .input[type="time"], .input[type="datetime-local"], .input[type="month"] {
-  -webkit-appearance: none; appearance: none; min-height: 0;
+  -webkit-appearance: none; appearance: none;
 }
-.input::-webkit-date-and-time-value { text-align: left; margin: 0; }
-.input::-webkit-datetime-edit { padding: 0; }
+/* Reserve a stable line height so the empty date box is exactly the same size as a filled
+   one (iOS Safari otherwise collapses the empty value, then grows it once a date is picked). */
+.input::-webkit-date-and-time-value { text-align: left; margin: 0; min-height: 1.4em; }
+.input::-webkit-datetime-edit { padding: 0; line-height: 1.4; }
 .input::-webkit-calendar-picker-indicator { margin-left: auto; cursor: pointer; opacity: .65; }
 .input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .textarea { resize: vertical; min-height: 72px; }
@@ -212,6 +214,15 @@ h3 { font-size: 14px; font-weight: 700; }
   border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all var(--speed); }
 .tab:hover { color: var(--text); }
 .tab.on { color: var(--text); border-color: var(--accent); }
+
+/* Full-screen / focus mode (CSS-based so it works on iPhone too): hide the app chrome
+   and breadcrumb, and let the tournament content use the whole viewport. */
+body.fs-mode .topbar,
+body.fs-mode .side,
+body.fs-mode .scrim,
+body.fs-mode .crumb { display: none !important; }
+body.fs-mode .shell { grid-template-columns: 1fr; }
+body.fs-mode .main { padding: 14px 16px 40px; }
 
 /* ---------- bracket ---------- */
 .bracket-wrap { overflow-x: auto; padding: 6px 2px 14px; }
@@ -487,9 +498,8 @@ h3 { font-size: 14px; font-weight: 700; }
   .hub-header .head-actions { margin-left: 0 !important; width: 100%; }
   .hub-header .head-actions .btn { width: 100%; justify-content: center; }
 
-  /* tabs scroll in one row instead of wrapping */
-  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
+  /* tabs wrap to multiple rows so they stay put — not a horizontally draggable strip */
+  .tabs { flex-wrap: wrap; overflow-x: visible; row-gap: 4px; }
   .tab { white-space: nowrap; margin-right: 18px; }
 
   .page-head { gap: 12px; }
