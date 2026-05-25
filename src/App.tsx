@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRoute, navigate } from './router'
-import { useMode, useTournaments, toggleMode, useRole, useAuthed, logout, upsertFromBackend, syncFromServer } from './store/store'
+import { useMode, useTournaments, toggleMode, useRole, useAuthed, logout, upsertFromBackend, syncFromServer, useFailedOver } from './store/store'
 import {
   IconGrid, IconTrophy, IconChart, IconPlus, IconMoon, IconSun, IconShield, IconEye, IconMenu, IconClose,
 } from './components/Icons'
@@ -17,6 +17,7 @@ export default function App() {
   const mode = useMode()
   const role = useRole()
   const authed = useAuthed()
+  const failedOver = useFailedOver()
   const tournaments = useTournaments()
   const [showLogin, setShowLogin] = useState(false)
   const [drawer, setDrawer] = useState(false)
@@ -101,6 +102,12 @@ export default function App() {
 
       <main className="main">
         <div className="container">
+          {failedOver && (
+            <div className="banner" style={{ marginBottom: 16 }}>
+              <span>⚠ Main server unreachable — running on the <b>backup</b>. Your data is safe and will sync back automatically.{!authed && ' Organizers: log in again to keep editing.'}</span>
+              {!authed && <button className="btn primary sm" style={{ marginLeft: 'auto' }} onClick={() => setShowLogin(true)}>Log in</button>}
+            </div>
+          )}
           {route.name === 'dashboard' && <Dashboard />}
           {route.name === 'new' && (organizer ? <CreateTournament /> : <ViewerBlock onLogin={() => setShowLogin(true)} />)}
           {route.name === 'leaderboards' && <Leaderboards />}

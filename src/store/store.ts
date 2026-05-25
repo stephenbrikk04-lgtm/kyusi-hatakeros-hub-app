@@ -6,7 +6,7 @@ import {
 import { uid } from '../engine/util'
 import { buildInitialMatches, maybeAdvanceSwiss, maybeStartPlayoff, stage1Complete } from '../engine/build'
 import { recompute } from '../engine/score'
-import { backendEnabled, apiLogin, apiPut, apiDelete, apiGet, apiList } from '../backend'
+import { backendEnabled, apiLogin, apiPut, apiDelete, apiGet, apiList, onFailover } from '../backend'
 
 const LS_KEY = 'bracketforge.v1'
 
@@ -18,6 +18,7 @@ interface State {
   role: Role
   authed: boolean // organizer is logged in
   token: string | null // server write token (persisted so saves survive a page reload)
+  failedOver: boolean // true once the app switched to the backup server (session-only)
 }
 
 const ORG_USER = 'Kyusihatakeros2026'
@@ -40,12 +41,13 @@ function load(): State {
       }
       if (state.authed === undefined) state.authed = false
       if (state.token === undefined) state.token = null
+      state.failedOver = false // session-only; never restore a stale failover flag
       // role follows auth: a saved organizer stays logged in across reloads
       state.role = state.authed ? 'organizer' : 'viewer'
       return state
     }
   } catch {}
-  return { tournaments: [], mode: 'dark', role: 'viewer', authed: false, token: null }
+  return { tournaments: [], mode: 'dark', role: 'viewer', authed: false, token: null, failedOver: false }
 }
 
 let state: State = load()
@@ -129,6 +131,15 @@ export function logout() {
   syncToken = null
   set((s) => ({ ...s, authed: false, role: 'viewer', token: null }))
 }
+
+export function useFailedOver() { return useStore((s) => s.failedOver) }
+
+// When the transport fails over to the backup, the primary's write token is no longer valid,
+// so an organizer must log in again (against the backup) to keep editing. Reads keep working.
+onFailover(() => {
+  syncToken = null
+  set((s) => ({ ...s, failedOver: true, authed: false, role: 'viewer', token: null }))
+})
 
 // Push a tournament to the backend (organizer only). Fire-and-forget; records the server's
 // version stamp on success so cross-device sync can tell which copy is freshest.
