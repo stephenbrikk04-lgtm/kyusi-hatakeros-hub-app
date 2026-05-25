@@ -15,7 +15,7 @@ const FORMAT_DESC: Record<Format, string> = {
 
 export default function CreateTournament() {
   const [name, setName] = useState('')
-  const [game, setGame] = useState('Beyblade X')
+  const [game, setGame] = useState('')
   const [organizer, setOrganizer] = useState('')
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
