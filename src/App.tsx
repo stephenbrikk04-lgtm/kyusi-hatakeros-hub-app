@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRoute, navigate } from './router'
-import { useMode, useTournaments, toggleMode, useRole, useAuthed, logout, upsertFromBackend } from './store/store'
+import { useMode, useTournaments, toggleMode, useRole, useAuthed, logout, upsertFromBackend, syncFromServer } from './store/store'
 import {
   IconGrid, IconTrophy, IconChart, IconPlus, IconMoon, IconSun, IconShield, IconEye, IconMenu, IconClose,
 } from './components/Icons'
@@ -24,6 +24,13 @@ export default function App() {
   const hasRanking = tournaments.some((t) => t.settings.format === 'round_robin' || t.settings.format === 'swiss')
 
   useEffect(() => { setDrawer(false) }, [route]) // close the mobile drawer on navigation
+
+  // Keep the dashboard in sync with the cloud so every device shows the same tournaments.
+  useEffect(() => {
+    syncFromServer()
+    const iv = setInterval(syncFromServer, 12000)
+    return () => clearInterval(iv)
+  }, [])
 
   // a shared live link opens a spectator (view-only) page with no chrome
   if (route.name === 'live') return <LiveView id={route.id} />

@@ -29,15 +29,28 @@ export async function apiGet(id: string): Promise<Tournament | null> {
   } catch { return null }
 }
 
-export async function apiPut(id: string, t: Tournament, token: string): Promise<boolean> {
+// List every tournament on the server (summaries: id + updatedAt + basic fields).
+// Used to populate the dashboard from the cloud so it shows the same set on any device.
+export async function apiList(): Promise<{ id: string; updatedAt?: number }[]> {
+  try {
+    const r = await fetch(`${API}/api/tournaments`)
+    if (!r.ok) return []
+    return (await r.json()) as { id: string; updatedAt?: number }[]
+  } catch { return [] }
+}
+
+// Returns the server's updatedAt on success (so the client can record the synced version),
+// or null on failure.
+export async function apiPut(id: string, t: Tournament, token: string): Promise<number | null> {
   try {
     const r = await fetch(`${API}/api/tournaments/${id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
       body: JSON.stringify(t),
     })
-    return r.ok
-  } catch { return false }
+    if (!r.ok) return null
+    return ((await r.json()).updatedAt as number) ?? Date.now()
+  } catch { return null }
 }
 
 export async function apiDelete(id: string, token: string): Promise<boolean> {

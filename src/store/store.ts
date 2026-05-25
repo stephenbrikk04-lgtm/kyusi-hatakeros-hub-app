@@ -6,7 +6,7 @@ import {
 import { uid } from '../engine/util'
 import { buildInitialMatches, maybeAdvanceSwiss, maybeStartPlayoff, stage1Complete } from '../engine/build'
 import { recompute } from '../engine/score'
-import { backendEnabled, apiLogin, apiPut, apiDelete } from '../backend'
+import { backendEnabled, apiLogin, apiPut, apiDelete, apiGet, apiList } from '../backend'
 
 const LS_KEY = 'bracketforge.v1'
 
@@ -115,7 +115,7 @@ export async function login(user: string, pass: string): Promise<boolean> {
     syncToken = token
     set((s) => ({ ...s, authed: true, role: 'organizer', token })) // persist the token
     // publish any tournaments created offline so viewers can see them
-    state.tournaments.forEach((t) => apiPut(t.id, t, token).catch(() => {}))
+    state.tournaments.forEach((t) => apiPut(t.id, t, token).then((ts) => { if (ts) markSynced(t.id, ts) }).catch(() => {}))
     return true
   }
   if (user.trim() === ORG_USER && pass === ORG_PASS) {
@@ -130,9 +130,17 @@ export function logout() {
   set((s) => ({ ...s, authed: false, role: 'viewer', token: null }))
 }
 
-// Push a tournament to the backend (organizer only). Fire-and-forget.
+// Push a tournament to the backend (organizer only). Fire-and-forget; records the server's
+// version stamp on success so cross-device sync can tell which copy is freshest.
 function publish(t: Tournament) {
-  if (backendEnabled() && syncToken) apiPut(t.id, t, syncToken).catch(() => {})
+  if (backendEnabled() && syncToken) {
+    apiPut(t.id, t, syncToken).then((ts) => { if (ts) markSynced(t.id, ts) }).catch(() => {})
+  }
+}
+
+// Stamp a tournament with the server's updatedAt without re-publishing it.
+function markSynced(id: string, updatedAt: number) {
+  set((s) => ({ ...s, tournaments: s.tournaments.map((t) => (t.id === id ? { ...t, updatedAt } : t)) }))
 }
 
 // Used by the live (spectator) view: merge a tournament fetched from the backend into
@@ -143,6 +151,21 @@ export function upsertFromBackend(t: Tournament) {
     const next = i >= 0 ? s.tournaments.map((x) => (x.id === t.id ? t : x)) : [t, ...s.tournaments]
     return { ...s, tournaments: next }
   })
+}
+
+// Pull the cloud's tournament list into local state so the dashboard shows the same set on any
+// device. Brings in tournaments this device is missing and refreshes any the server has a newer
+// copy of. Local-only tournaments (not yet on the server) aren't on the list, so they're left
+// untouched — and get pushed up on the next organizer login.
+export async function syncFromServer() {
+  if (!backendEnabled()) return
+  const list = await apiList()
+  for (const s of list) {
+    const local = state.tournaments.find((t) => t.id === s.id)
+    if (local && (local.updatedAt ?? 0) >= (s.updatedAt ?? 0)) continue
+    const full = await apiGet(s.id)
+    if (full) upsertFromBackend(full)
+  }
 }
 
 // ---- defaults ----

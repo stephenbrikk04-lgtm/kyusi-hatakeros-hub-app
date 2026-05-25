@@ -172,8 +172,18 @@ h3 { font-size: 14px; font-weight: 700; }
 .input, .select, .textarea {
   width: 100%; padding: 10px 12px; border-radius: var(--r); background: var(--surface);
   border: 1px solid var(--border); color: var(--text); transition: border var(--speed);
+  font: inherit; line-height: 1.4;
 }
 .input:focus, .select:focus, .textarea:focus { outline: none; border-color: var(--accent); }
+/* Native date/time inputs don't size like text inputs (esp. iOS Safari): strip the
+   native control styling so they fill the column and line up with sibling fields. */
+.input[type="date"], .input[type="time"], .input[type="datetime-local"], .input[type="month"] {
+  -webkit-appearance: none; appearance: none; min-height: 0;
+}
+.input::-webkit-date-and-time-value { text-align: left; margin: 0; }
+.input::-webkit-datetime-edit { padding: 0; }
+.input::-webkit-calendar-picker-indicator { margin-left: auto; cursor: pointer; opacity: .65; }
+.input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .textarea { resize: vertical; min-height: 72px; }
 .row { display: flex; gap: 14px; flex-wrap: wrap; }
 .row > * { flex: 1; min-width: 160px; }

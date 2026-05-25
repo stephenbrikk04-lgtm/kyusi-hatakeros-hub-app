@@ -139,6 +139,7 @@ export interface Tournament {
   createdAt: number
   startedAt?: number
   completedAt?: number
+  updatedAt?: number // set by the backend on each save; used to sync the freshest copy across devices
 }
 
 export interface StandingRow {
